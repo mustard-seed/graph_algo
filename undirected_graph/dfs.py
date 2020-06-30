@@ -96,5 +96,36 @@ class depthFirstSearchPaths(depthFirstSearch):
 
         return path
 
+class depthFirstSearchCC(depthFirstSearch):
+    """
+    Find the connected components of a graph
+    """
+    def __init__(self, g: graph.UndirectedGraph):
+        super().__init__(g)
+        # Component that each vertex belongs to
+        self._componentIds = [0] * g.v
+        # Count of components
+        self._count = 0
+        for vertex in range(0, g.v):
+            if self._isMarked[vertex] is False:
+                self._dfs(g, vertex)
+                self._count += 1
 
+    def _apply(self, currentV: int, neighbourV: int):
+        pass
+
+    def _preHook(self, currentV: int):
+        self._componentIds[currentV] = self._count
+
+    @property
+    def count(self):
+        return self._count
+
+    def id(self, v: int) -> int:
+        """
+        Returns the component id that the given vertex belongs to
+        :param v: Index of the given vertex
+        :return: The component id
+        """
+        return self._componentIds[v]
 
