@@ -5,8 +5,43 @@ import undirected_graph.graph as graph
 
 from typing import List, Union
 from collections import deque
+from abc import abstractmethod, ABC
 
-class depthFirstSearchPaths(object):
+class depthFirstSearch(ABC):
+    """
+    Base DFS algorithm
+    """
+    @abstractmethod
+    def __init__(self, g: graph.UndirectedGraph):
+        super().__init__()
+        self._isMarked = [False] * g.v
+
+    @abstractmethod
+    def _apply (self, currentV: int, neighbourV: int):
+        pass
+
+    @abstractmethod
+    def _preHook (self, currentV: int):
+        pass
+
+    def _dfs (self, g: graph.UndirectedGraph, v: int) -> None:
+        """
+        Run DFS from the given vertex v
+        :param g: The graph
+        :param v: The vertex
+        :return: None
+        """
+        self._preHook(v)
+        self._isMarked[v] = True
+        adjList = g.adj(v)
+        for neighbour in adjList:
+            if self._isMarked[neighbour] is False:
+                self._apply(currentV=v, neighbourV=neighbour)
+                self._dfs(g, neighbour)
+
+
+
+class depthFirstSearchPaths(depthFirstSearch):
 
     def __init__(self, g: graph.UndirectedGraph, s:int ):
         """
@@ -15,29 +50,18 @@ class depthFirstSearchPaths(object):
         :param s: Index of the source vertex
         :return:
         """
+        super().__init__(g)
         assert s < g.v, 'The source vertex index is out of bound!'
-        self._isMarked = [False] * g.v
         self._edgeTo = [-1] * g.v
         self._reachableVertexCount = 0
         self._source = s
-        self.dfs(g, s)
+        self._dfs(g, s)
 
-
-    def dfs (self, g: graph.UndirectedGraph, v: int) -> None:
-        """
-        Run DFS from the given vertex v
-        :param g: The graph
-        :param v: The vertex
-        :return: None
-        """
-        self._isMarked[v] = True
+    def _preHook(self, currentV: int):
         self._reachableVertexCount += 1
-        adjList = g.adj(v)
-        for neighbour in adjList:
-            if self._isMarked[neighbour] is False:
-                self._edgeTo[neighbour] = v
-                self.dfs(g, neighbour)
 
+    def _apply(self, currentV: int, neighbourV: int):
+        self._edgeTo[neighbourV] = currentV
 
     def hasPathTo (self, v: int) -> bool:
         """
