@@ -129,3 +129,57 @@ class depthFirstSearchCC(depthFirstSearch):
         """
         return self._componentIds[v]
 
+class depthFirstSearchCycle(depthFirstSearch):
+    def __init__(self, g):
+        super().__init__(g)
+        self._cyclePath = []
+        self._source = None
+        self._edgeTo = [-1] * g.v
+        self._cycleFound = False
+
+        for vertex in range(0, g.v):
+            if self._isMarked[vertex] is False:
+                self._cyclePath.clear()
+                self._source = vertex
+                self._edgeTo = [-1] * g.v
+                self._cycleFound = False
+                self._dfs(g, vertex)
+                if self._cycleFound is True:
+                    self._cyclePath.append(vertex)
+                    break
+
+
+    def _apply(self, currentV: int, neighbourV: int):
+        pass
+
+    def _preHook(self, currentV: int):
+        pass
+
+    def _dfs(self, g: graph.UndirectedGraph, v: int) -> None:
+        """
+        Custom DFS algorithm for finding the cycle
+        :param g:
+        :param v:
+        :return:
+        """
+        self._isMarked[v] = True
+        for neighbour in g.adj(v):
+            if self._edgeTo[v] != self._source and self._edgeTo[v] != -1 and neighbour == self._source:
+                """We don't want to consider immediate back-tracking as a cycle"""
+                self._cycleFound = True
+                self._cyclePath.append(neighbour)
+            elif self._cycleFound is False and self._isMarked[neighbour] is False:
+                self._edgeTo[neighbour] = v
+                self._dfs(g, neighbour)
+                if self._cycleFound is True:
+                    self._cyclePath.append(neighbour)
+
+    def cycle(self) -> Union[List, None]:
+        """
+        Provides one cycle, if exists
+        :return: List or None
+        """
+        if self._cycleFound is True:
+            return self._cyclePath
+        else:
+            return None
