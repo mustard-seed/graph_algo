@@ -195,4 +195,59 @@ class DigraphTopological(object):
         else:
             return None
 
+class DigraphSCC(object):
+    """
+    API for finding the strong components of a diagraph using
+    the Kosaraju-Sharir algorithm
+    """
+    def __init__(self, g: Digraph):
+        self._isMarked = [False] * g.v
+        self._componentId = [-1] * g.v
+        self._numSC = 0
+
+        # First, obtain the reverse DFS post-order on the reverse graph
+        rGraph = g.reverse()
+        orderFinder = DigraphOrder(rGraph)
+        reversePostOrder = orderFinder.reversePostOrder
+
+        # Then, perform DFS on the original graph according to the order of the vertices in the
+        # reverse DFS post order obtained on the reverse graph
+        for v in reversePostOrder:
+            if self._isMarked[v] is False:
+                self._dfs(g, v)
+                self._numSC += 1
+
+    def _dfs(self, g: Digraph, v: int):
+        self._isMarked[v] = True
+        self._componentId[v] = self._numSC
+        adjList = g.adj(v)
+        for d in adjList:
+            if self._isMarked[d] is False:
+                self._dfs(g, d)
+
+    def stronglyConnected(self, v: int, w: int) -> bool:
+        """
+        Determines whether two given vertices belong to the same strong component
+        :param v: The first vertex
+        :param w: The other vertex
+        :return: True/False
+        """
+        return self._componentId[v] == self._componentId[w]
+
+    @property
+    def count(self) -> int:
+        """
+        Reports the number of strong components in the graph
+        :return: int
+        """
+        return self._numSC
+
+    def id(self, v: int):
+        """
+        Report the id of the strong component that the given vertex is in
+        :param v: The given vertex
+        :return: int
+        """
+        return self._componentId[v]
+
 
