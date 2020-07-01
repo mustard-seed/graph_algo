@@ -138,3 +138,61 @@ class DigraphCycle(object):
         newList.reverse()
         return newList
 
+class DigraphOrder(object):
+    """
+    APIs for generating the pre, post, and reverse-post order of DFS on a digraph
+    """
+    def __init__(self, g: Digraph):
+        """
+        Populate the orders
+        :param g:
+        """
+        self._isMarked = [False] * g.v
+        self._preOrder = []
+        self._postOrder = []
+        for v in range(g.v):
+            if self._isMarked[v] is False:
+                self._dfs(g, v)
+
+    def _dfs(self, g: Digraph, v: int):
+        self._isMarked[v] = True
+        self._preOrder.append(v)
+        for d in g.adj(v):
+            if self._isMarked[d] is False:
+                self._dfs(g, d)
+        self._postOrder.append(v)
+
+    @property
+    def preOrder(self):
+        return deepcopy(self._preOrder)
+
+    @property
+    def postOrder(self):
+        return deepcopy(self._postOrder)
+
+    @property
+    def reversePostOrder(self):
+        newList = deepcopy(self._postOrder)
+        newList.reverse()
+        return newList
+
+class DigraphTopological(object):
+    """
+    Perform topological sort on a given graph if it doesn't contain any directed cycles
+    """
+    def __init__(self, g: Digraph):
+        self._toplogicalOrder = None
+        self._orderFinder = None
+        self._cycleFinder = DigraphCycle(g)
+        if self._cycleFinder.hasCycle is False:
+            self._orderFinder = DigraphOrder(g)
+            self._toplogicalOrder = self._orderFinder.reversePostOrder
+
+    @property
+    def toplogicalOrder(self):
+        if self._toplogicalOrder:
+            return deepcopy(self._toplogicalOrder)
+        else:
+            return None
+
+
