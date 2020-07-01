@@ -6,6 +6,7 @@ import undirected_graph.graph as graph
 from typing import List, Union
 from collections import deque
 from abc import abstractmethod, ABC
+from copy import deepcopy
 
 class depthFirstSearch(ABC):
     """
@@ -183,3 +184,42 @@ class depthFirstSearchCycle(depthFirstSearch):
             return self._cyclePath
         else:
             return None
+
+class depthFirstSearchBipartite(depthFirstSearch):
+    def __init__(self, g: graph.UndirectedGraph):
+        super().__init__(g)
+        self._isBipartite = True
+        self.colouringList = [[], []]
+        self.colourAssignment = [-1] * g.v
+        for v in range(0, g.v):
+            if self._isMarked [v] is False:
+                self.dfs(g, v, 0)
+                if self._isBipartite is False:
+                    break
+
+    def dfs(self, g: graph.UndirectedGraph, v: int, colour: int):
+        self._isMarked[v] = True
+        self.colouringList[colour].append(v)
+        self.colourAssignment[v] = colour
+        nextColour = 0 if colour is 1 else 1
+        for n in g.adj(v):
+            if self._isMarked[n] is True:
+                if self.colourAssignment[n] != nextColour:
+                    self._isBipartite = False
+                    break
+            else:
+                self.dfs(g, n, nextColour)
+
+    def _preHook(self, currentV: int):
+        pass
+
+    def _apply(self, currentV: int, neighbourV: int):
+        pass
+
+    @property
+    def isBipartite(self):
+        return self._isBipartite
+
+    def getPartitions(self):
+        return deepcopy(self.colouringList)
+
